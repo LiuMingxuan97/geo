@@ -35,12 +35,12 @@ def get_elevation_from_dem(dem_path, longitude, latitude):
         print("经纬度坐标点超出DEM范围")
         return None
 
-# 示例用法
-dem_path = "./data/ENVI_DEM.tif"  # 替换为你的DEM文件路径
-longitude = 120.0  # 经度示例值
-latitude = 30.0  # 纬度示例值
-elevation = get_elevation_from_dem(dem_path, longitude, latitude)
-if elevation is not None:
-    print("高程值:", elevation)
+# # 示例用法
+# dem_path = "./data/ENVI_DEM.tif"  # 替换为你的DEM文件路径
+# longitude = 120.0  # 经度示例值
+# latitude = 30.0  # 纬度示例值
+# elevation = get_elevation_from_dem(dem_path, longitude, latitude)
+# if elevation is not None:
+#     print("高程值:", elevation)
 
 

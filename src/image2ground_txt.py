@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 sys.path.append(Path(__file__).absolute().parent.as_posix())
 from interp_txt import get_time_value
+from get_height import get_elevation_from_dem
 
 spice.furnsh('./conf/naif0012.tls')
 spice.furnsh('./conf/earth_latest_high_prec.bpc')
@@ -18,10 +19,11 @@ class CalLatLon:
     """
     计算
     """
-    def __init__(self, timestamps:float, obs_pos: list, quaternion:list, sample_num:int):
+    def __init__(self, timestamps:float, obs_pos: list, quaternion:list, sample_num:int, dem_path:str):
         self.timestamps = timestamps
         self.obs_pos = obs_pos
         self.quaternion = quaternion
+        self.dem_path = dem_path
         self.Px = 3.5e-6
         self.Py = 3.5e-6
         self.F = 1942.555e-3
@@ -87,11 +89,11 @@ class CalLatLon:
                 R_eci2ecr[i,j] = mat[i][j] # / pow(3,0.5)
         return R_eci2ecr
     
-    def cal_pos(self, vi):
+    def cal_pos(self, vi, height):
     
         obs_x, obs_y, obs_z = self.obs_pos[0], self.obs_pos[1], self.obs_pos[2]
-        A = (self.major_radius+1500) ** 2
-        B = (self.minor_radius +1500) ** 2
+        A = (self.major_radius+height) ** 2
+        B = (self.minor_radius +height) ** 2
         a = (vi[0]**2 + vi[1]**2) / A + vi[2] ** 2 / B
         b = 2*(( vi[0] * obs_x + vi[1] * obs_y) / A + vi[2] * obs_z / B)
         c = (obs_x ** 2 +obs_y ** 2) / A + obs_z ** 2 / B - 1
@@ -123,8 +125,13 @@ class CalLatLon:
         
         R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_img2cam))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
-        ground_point = self.cal_pos(v_i)
+        ground_point = self.cal_pos(v_i, 0)
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+        
+        elevation = get_elevation_from_dem(self.dem_path, lon, lat)
+        ground_point = self.cal_pos(v_i, int(elevation))
+        lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+        
         print('\n',lat,'\t', lon, '\t',alt)
         return [ lat, lon]
         
@@ -146,13 +153,14 @@ if __name__ == '__main__':
     pos_file = './data/dingbiao.eph'
     qua_file = './data/dingbiao.att'
     line_file = './data/dingbiao.it'
-    timestamp = get_timestamp(line_num, line_file )
-    # timestamp = 120162968.627485
+    dem_path = './data/ENVI_DEM.tif'
+    timestamp = get_timestamp(line_num, line_file ) -1
+    # timestamp = 120162968.627485s
     x,y,z,q = get_time_value(pos_file, qua_file, timestamp)
     # print("x:",x,"\ty:",y,"\tz:",z,"\tq:",q)
     obs_list = [x,y,z]
     # timestamps = 781416469
 
-    cal = CalLatLon(timestamp, obs_list, q, sample_num)
+    cal = CalLatLon(timestamp, obs_list, q, sample_num, dem_path)
     resutl = cal.process()
     
