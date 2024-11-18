@@ -32,9 +32,9 @@ def txt2it(txt_path, it_file_path, eph_file_path, att_file_path):
             
             
 if __name__=='__main__':
-    txt_path = './data/aux_cmos1_pan_dingbiao.txt'
-    it_file_path = './data/dingbiao.it'
-    eph_file_path = './data/dingbiao.eph'
-    att_file_path = './data/dingbiao.att'
+    txt_path = './data/aux_cmos1_pan.txt'
+    it_file_path = './data/test.it'
+    eph_file_path = './data/test.eph'
+    att_file_path = './data/test.att'
     txt2it(txt_path=txt_path, it_file_path=it_file_path, eph_file_path=eph_file_path, 
             att_file_path=att_file_path)

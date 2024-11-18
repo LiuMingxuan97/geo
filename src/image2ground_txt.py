@@ -31,7 +31,7 @@ class CalLatLon:
         self.minor_radius=6356752.3
         # 以中心点为原点的 y, x 偏移
         self.pix_cam_id = (0,sample_num)
-        (self.principal_point_x, self.principal_point_y) = (1.64, 0)
+        (self.principal_point_x, self.principal_point_y) = (0, 1.64)
         
         
     def pos_cam(self):
@@ -45,9 +45,12 @@ class CalLatLon:
         fc = self.F
         x0 = self.principal_point_x * self.Px
         y0 = self.principal_point_y * self.Py
-        R_img2cam = np.array([[0, -1, y0],
-                            [1, 0, -x0],
-                            [0, 0, -fc]])
+        # R_img2cam = np.array([[0, -1, y0],
+        #                     [1, 0, -x0],
+        #                     [0, 0, -fc]])
+        R_img2cam = np.array([[1, 0, -x0],
+                            [0, 1, -y0],
+                            [0, 0, fc]])
         
         
         # R_img2cam = np.array([[self.principal_point_y,    0,                     0],
@@ -80,7 +83,7 @@ class CalLatLon:
         sate_time = end_time
         # print(sate_time)
         date_str = sate_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        print("date_str", date_str)
+        # print("date_str", date_str)
 
         et = spice.str2et(date_str)
         mat = spice.pxform('J2000', 'ITRF93',  et)
@@ -129,10 +132,11 @@ class CalLatLon:
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
         elevation = get_elevation_from_dem(self.dem_path, lon, lat)
+        # print(elevation)
         ground_point = self.cal_pos(v_i, int(elevation))
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
-        print('\n',lat,'\t', lon, '\t',alt)
+        # print('\n',lat,'\t', lon, '\t',alt)
         return [ lat, lon]
         
 def get_timestamp(line_num, time_file):
@@ -147,14 +151,19 @@ def get_timestamp(line_num, time_file):
         
 if __name__ == '__main__':
     
-    line_num = 44475
-    sample_num = 1172
+    line_num = 101744
     
-    pos_file = './data/dingbiao.eph'
-    qua_file = './data/dingbiao.att'
-    line_file = './data/dingbiao.it'
+    # 11.08测试使用的行列号
+    # cmos1
+    # sample_num = -(8192-7089)
+    # cmos2
+    sample_num = 2462
+    
+    pos_file = './data/test.eph'
+    qua_file = './data/test.att'
+    line_file = './data/test.it'
     dem_path = './data/ENVI_DEM.tif'
-    timestamp = get_timestamp(line_num, line_file ) -1
+    timestamp = get_timestamp(line_num, line_file )
     # timestamp = 120162968.627485s
     x,y,z,q = get_time_value(pos_file, qua_file, timestamp)
     # print("x:",x,"\ty:",y,"\tz:",z,"\tq:",q)

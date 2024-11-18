@@ -90,8 +90,8 @@ class CalLatLon:
     def cal_pos(self, vi):
     
         obs_x, obs_y, obs_z = self.obs_pos[0], self.obs_pos[1], self.obs_pos[2]
-        A = (self.major_radius+164.852865) ** 2
-        B = (self.minor_radius +164.852865) ** 2
+        A = (self.major_radius+346) ** 2
+        B = (self.minor_radius +346) ** 2
         a = (vi[0]**2 + vi[1]**2) / A + vi[2] ** 2 / B
         b = 2*(( vi[0] * obs_x + vi[1] * obs_y) / A + vi[2] * obs_z / B)
         c = (obs_x ** 2 +obs_y ** 2) / A + obs_z ** 2 / B - 1
@@ -130,9 +130,9 @@ class CalLatLon:
         
         
 if __name__ == '__main__':
-    pos_file = './data/xsd10/XSD-10_PMS_230014018068_01_CCD-1.eph'
-    qua_file = './data/xsd10/XSD-10_PMS_230014018068_01_CCD-1.att'
-    timestamp = 781416468.7485100031
+    pos_file = './data/xsd10/XSD-10_PMS_225455018437_01_CCD-1.eph'
+    qua_file = './data/xsd10/XSD-10_PMS_225455018437_01_CCD-1.att'
+    timestamp = 783495637.0161859989
     x,y,z,q = get_time_value(pos_file, qua_file, timestamp)
     obs_list = [x,y,z]
     # timestamps = 781416469

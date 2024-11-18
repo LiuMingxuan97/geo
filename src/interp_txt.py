@@ -63,10 +63,11 @@ def slerp(q0:list, q1:list, delta_t):
 
 def get_time_value(pos_file_path:str, qua_list_path:list, timestamp):
     """读取wgs84位置信息,四元数信息
-
+    
     Args:
         file_path (str): 文件地址
     """
+    timestamp = timestamp
     time_value_list = []
     pos_x_list = []
     pos_y_list = []
