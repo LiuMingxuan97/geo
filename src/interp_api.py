@@ -87,7 +87,6 @@ def get_time_value(pos_file_path:str, qua_lines_info:list, timestamp):
         # print("timestamp", timestamp)
         # print(dat[0])
         if float(dat[0]) >= float(timestamp):
-            print("dat[0]", dat[0])
             dat = qua_lines_info[i-1].split('\t')
             t0 = float(dat[0])
             q0 = [dat[2], dat[3], dat[4], dat[1]] # [ dat[1], dat[2], dat[3], dat[4]]

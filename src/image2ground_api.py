@@ -1,6 +1,7 @@
 import numpy as np
 import pymap3d
 import arrow
+import json
 from datetime import datetime, timedelta, timezone
 from scipy.spatial.transform import Rotation
 from math import sin,cos
@@ -11,6 +12,8 @@ import sys
 sys.path.append(Path(__file__).absolute().parent.as_posix())
 from interp_api import get_time_value
 from get_height import get_elevation_from_dem
+
+
 
 spice.furnsh('./conf/naif0012.tls')
 spice.furnsh('./conf/earth_latest_high_prec.bpc')
@@ -64,10 +67,12 @@ class CalLatLon:
         return R_img2cam
     
     def cam2body(self):
-        R_cam2body = np.array([[-0.321, -0.766, -0.557],
-                            [-0.383, 0.643, -0.663],
-                            [0.866, 0, -0.5]])
-        return R_cam2body
+        # 读取配置文件
+        with open("./conf/matrix.json", "r") as file:
+            config = json.load(file)
+            # 将矩阵转换为 NumPy 格式
+            R_cam2body = np.array(config["matrix"])
+            return R_cam2body
     
     def q_rotation(self):
     # 创建旋转矩阵对象
@@ -126,7 +131,7 @@ class CalLatLon:
         pos_cam_mm = self.pos_cam()
         R_cam2body = self.cam2body()
         
-        R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_img2cam))
+        R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
         ground_point = self.cal_pos(v_i, 0)
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
@@ -136,12 +141,11 @@ class CalLatLon:
         ground_point = self.cal_pos(v_i, int(elevation))
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
-        # print('\n',lat,'\t', lon, '\t',alt)
         return [ lat, lon]
         
 def get_timestamp(line_num, time_file):
     # time_lines = time_file.read().decode().splitlines()
-    print("line_num: ", line_num)
+    # print("line_num: ", line_num)
     line = time_file[line_num]
     dat = line.strip().split('\t')
     timestamp = float(dat[1])

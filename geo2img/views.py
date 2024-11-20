@@ -50,7 +50,7 @@ def test_api(request,
 
         cal = CalLatLon(timestamp, obs_list, q, line_sample[1], dem_path)
         resutl = cal.process()
-        results.append(resutl)
+        results.append([line_sample,resutl])
     return {"status": "success", "message": "Data processed", "data": results}
 
 
