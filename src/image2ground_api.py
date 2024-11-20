@@ -71,7 +71,7 @@ class CalLatLon:
         with open("./conf/matrix.json", "r") as file:
             config = json.load(file)
             # 将矩阵转换为 NumPy 格式
-            R_cam2body = np.array(config["matrix"])
+            R_cam2body = np.array(config["cam2body"])
             return R_cam2body
     
     def q_rotation(self):
@@ -123,6 +123,26 @@ class CalLatLon:
         ground_point = result * vi + self.obs_pos
         return ground_point
     
+    def iterative_ground_point_calculation(self, v_i):
+        previous_ground_point = None
+        for _ in range(10):  # 最多迭代10次
+            ground_point = self.cal_pos(v_i, 0 if previous_ground_point is None else int(elevation))
+            lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+            
+            elevation = get_elevation_from_dem(self.dem_path, lon, lat)
+            
+            # 检查是否满足提前停止的条件
+            if previous_ground_point is not None:
+                dx = abs(ground_point[0] - previous_ground_point[0])
+                dy = abs(ground_point[1] - previous_ground_point[1])
+                if dx < 10 and dy < 10:
+                    break  # 提前停止迭代
+            
+            previous_ground_point = ground_point  # 更新上一次的ground_point
+        
+        # 返回最后一次计算的lat, lon, alt
+        return lat, lon, alt
+    
     def process(self):
         
         R_eci2ecr = self.eci2ecr()
@@ -133,15 +153,17 @@ class CalLatLon:
         
         R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
-        ground_point = self.cal_pos(v_i, 0)
-        lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+        # ground_point = self.cal_pos(v_i, 0)
+        # lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
-        elevation = get_elevation_from_dem(self.dem_path, lon, lat)
-        # print(elevation)
-        ground_point = self.cal_pos(v_i, int(elevation))
-        lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+        # elevation = get_elevation_from_dem(self.dem_path, lon, lat)
+        # # print(elevation)
+        # ground_point = self.cal_pos(v_i, int(elevation))
+        # lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
+        lat, lon, alt = self.iterative_ground_point_calculation(v_i)
         
         return [ lat, lon]
+
         
 def get_timestamp(line_num, time_file):
     # time_lines = time_file.read().decode().splitlines()
