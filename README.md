@@ -9,7 +9,7 @@ docker build -f DockerfileBase -t mygeo:base.
 Dockerfile 代码执行镜像
 镜像构建命令
 ```shell
-docker build -t mygeo:base .
+docker build -t geotrans:v1.0 .
 ```
 容器启动命令
 ```shell
