@@ -48,7 +48,7 @@ def test_api(request,
         x,y,z,q = get_time_value(eph_lines_info, qua_lines_info, timestamp)
         obs_list = [x,y,z]
 
-        cal = CalLatLon(timestamp, obs_list, q, line_sample[1], dem_path)
+        cal = CalLatLon(timestamp, obs_list, q, line_sample[1]-4608, dem_path)
         resutl = cal.process()
         results.append([line_sample,resutl])
     return {"status": "success", "message": "Data processed", "data": results}

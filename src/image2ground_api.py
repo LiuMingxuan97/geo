@@ -8,6 +8,7 @@ from math import sin,cos
 import spiceypy as spice
 import math
 from pathlib import Path
+from config.conf import R_cam2body, Px, Py, F, principal_point_x, principal_point_y
 import sys
 sys.path.append(Path(__file__).absolute().parent.as_posix())
 from interp_api import get_time_value
@@ -15,8 +16,8 @@ from get_height import get_elevation_from_dem
 
 
 
-spice.furnsh('./conf/naif0012.tls')
-spice.furnsh('./conf/earth_latest_high_prec.bpc')
+spice.furnsh('./config/naif0012.tls')
+spice.furnsh('./config/earth_latest_high_prec.bpc')
 
 class CalLatLon:
     """
@@ -27,14 +28,14 @@ class CalLatLon:
         self.obs_pos = obs_pos
         self.quaternion = quaternion
         self.dem_path = dem_path
-        self.Px = 3.5e-6
-        self.Py = 3.5e-6
-        self.F = 1942.555e-3
+        self.Px = Px
+        self.Py = Py
+        self.F = F
         self.major_radius=6378134
         self.minor_radius=6356752.3
         # 以中心点为原点的 y, x 偏移
         self.pix_cam_id = (0,sample_num)
-        (self.principal_point_x, self.principal_point_y) = (0, 1.64)
+        (self.principal_point_x, self.principal_point_y) = (principal_point_x, principal_point_y)
         
         
     def pos_cam(self):
@@ -66,13 +67,13 @@ class CalLatLon:
         
         return R_img2cam
     
-    def cam2body(self):
-        # 读取配置文件
-        with open("./conf/matrix.json", "r") as file:
-            config = json.load(file)
-            # 将矩阵转换为 NumPy 格式
-            R_cam2body = np.array(config["cam2body"])
-            return R_cam2body
+    # def cam2body(self):
+    #     # 读取配置文件
+    #     with open("./config/matrix.json", "r") as file:
+    #         config = json.load(file)
+    #         # 将矩阵转换为 NumPy 格式
+    #         R_cam2body = np.array(config["cam2body"])
+    #         return R_cam2body
     
     def q_rotation(self):
     # 创建旋转矩阵对象
@@ -149,7 +150,7 @@ class CalLatLon:
         R_body2eci_q = self.q_rotation()
         R_img2cam = self.img2cam()
         pos_cam_mm = self.pos_cam()
-        R_cam2body = self.cam2body()
+        # R_cam2body = self.cam2body()
         
         R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
