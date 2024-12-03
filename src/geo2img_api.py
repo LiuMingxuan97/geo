@@ -2,12 +2,13 @@ import numpy as np
 from pathlib import Path
 import sys
 sys.path.append(Path(__file__).absolute().parent.parent.as_posix())
-from src.interp_txt import get_time_value
+from src.interp_api import get_time_value
 from src.get_height import get_elevation_from_dem
-from src.image2ground_h import CalLatLon, get_timestamp
+from src.image2ground_h_api import CalLatLon, get_timestamp
 
 
-def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, threshold=0.1, max_iterations=20):
+def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, time_lines, 
+                eph_lines_info, qua_lines_info, threshold=0.1, max_iterations=20):
     """
     将地理坐标转换为图像像素坐标。
     
@@ -25,11 +26,14 @@ def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, threshold=0
 
     for iteration in range(max_iterations):
         # 计算当前像素 (u, v) 对应的地理坐标
-        current_lat, current_lon = lat_lon_func(u, v, height)
+        current_lat, current_lon = lat_lon_func(u, v, height, time_lines, 
+                eph_lines_info, qua_lines_info)
         
         # 计算 (u+1, v) 和 (u, v+1) 对应的地理坐标（数值偏导）
-        lat_du, lon_du = lat_lon_func(u + 1, v, height)
-        lat_dv, lon_dv = lat_lon_func(u, v + 1, height)
+        lat_du, lon_du = lat_lon_func(u + 1, v, height, time_lines, 
+                eph_lines_info, qua_lines_info)
+        lat_dv, lon_dv = lat_lon_func(u, v + 1, height, time_lines, 
+                eph_lines_info, qua_lines_info)
         
         # 计算雅可比矩阵的偏导数
         dlat_du = lat_du - current_lat
@@ -63,22 +67,13 @@ def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, threshold=0
     print("Failed to converge within the maximum number of iterations.")
     return None
 
-# 示例：地理到像素映射的虚拟函数
-def mock_lat_lon_func(u, v, height):
-    """
-    一个模拟的 (u, v) 到 (lat, lon) 的映射函数，用于测试。
-    假设映射为线性变化，并引入简单的偏移和比例因子。
-    """
-    lat = 40.0 + 0.001 * u + 0.0005 * v
-    lon = -100.0 + 0.0005 * u + 0.001 * v
-    return lat, lon
 
-def lat_lon_func(u:int, v:int, height:float)->tuple[float, float]:
+def lat_lon_func(u:int, v:int, height:float, line_file, pos_file, qua_file)->tuple[float, float]:
     line_num = u
-    pos_file = './data/test.eph'
-    qua_file = './data/test.att'
-    line_file = './data/test.it'
-    dem_path = './data/ENVI_DEM.tif'
+    # pos_file = './data/test.eph'
+    # qua_file = './data/test.att'
+    # line_file = './data/test.it'
+    # dem_path = './data/ENVI_DEM.tif'
     timestamp = get_timestamp(line_num, line_file )
     # timestamp = 120162968.627485s
     x,y,z,q = get_time_value(pos_file, qua_file, timestamp)

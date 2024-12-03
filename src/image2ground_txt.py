@@ -137,7 +137,7 @@ class CalLatLon:
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
         # print('\n',lat,'\t', lon, '\t',alt)
-        return [ lat, lon]
+        return [ lat, lon, alt]
         
 def get_timestamp(line_num, time_file):
     with open(time_file, "r") as file:
@@ -172,4 +172,5 @@ if __name__ == '__main__':
 
     cal = CalLatLon(timestamp, obs_list, q, sample_num, dem_path)
     resutl = cal.process()
+    print(resutl)
     

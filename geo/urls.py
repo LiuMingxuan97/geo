@@ -18,10 +18,12 @@ Including another URLconf
 from django.urls import path
 from ninja import NinjaAPI
 from geo2img.views import router as geo2img_router
+from img2geo.views import router as img2geo_router
 
 
 api = NinjaAPI()
 api.add_router("", geo2img_router)
+api.add_router("", img2geo_router)
 
 urlpatterns = [
     path('transform/', api.urls)
