@@ -1,6 +1,7 @@
 from pydantic import BaseModel, HttpUrl
 from typing import List, Tuple
 from ninja import Router, NinjaAPI, Query, Path, Schema, File, Form
+
 from ninja.files import UploadedFile
 import json
 import sys
@@ -41,5 +42,5 @@ def test_api(request,
         pixel_coordinates = world_to_pixel(initial_pixel, world_point, height, lat_lon_func,
                                         time_lines, eph_lines_info, qua_lines_info)
         results.append(pixel_coordinates)
-    return {"status": "success", "message": "Data processed", "data": results}
+    return {"status": "success", "code":0, "message": "Data processed", "data": results}
 

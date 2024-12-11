@@ -114,7 +114,7 @@ class CalLatLon:
         pos_cam_mm = self.pos_cam()
         R_cam2body = self.cam2body()
         
-        R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_img2cam))
+        R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
         ground_point = self.cal_pos(v_i, self.elevation)
         lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])

@@ -23,6 +23,8 @@ def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, time_lines,
     """
     u, v = initial_pixel
     target_lat, target_lon = world_point
+    
+    line_file_len = len(time_lines)
 
     for iteration in range(max_iterations):
         # 计算当前像素 (u, v) 对应的地理坐标
@@ -58,10 +60,13 @@ def world_to_pixel(initial_pixel, world_point, height, lat_lon_func, time_lines,
         # 更新像素坐标
         u += delta_u
         v += delta_v
+        
+        if u <= 0 or u >= line_file_len or v <= -8192 or v >= 8192:
+            return "Outside image boundaries"
 
         # 判断是否收敛
         if np.abs(delta_u) < threshold and np.abs(delta_v) < threshold:
-            print(f"Converged in {iteration + 1} iterations.")
+            # print(f"Converged in {iteration + 1} iterations.")
             return u, v
 
     print("Failed to converge within the maximum number of iterations.")
