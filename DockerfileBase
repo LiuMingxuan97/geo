@@ -4,8 +4,8 @@ WORKDIR /database
 
 
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
-RUN apt-get update \
-    apt-get install -y binutils libpq-dev gdal-bin libgdal-dev cmake
+RUN apt-get update &&\
+    apt-get install -y binutils libpq-dev gdal-bin libgdal-dev cmake g++
 COPY . /database
 
 RUN cd gdal-3.10.0 \
