@@ -35,45 +35,23 @@ class CalLatLon:
         self.minor_radius=6356752.3
         # 以中心点为原点的 y, x 偏移
         self.pix_cam_id = (0,sample_num)
-        (self.principal_point_x, self.principal_point_y) = (principal_point_x, principal_point_y)
+        self.principal_point_x, self.principal_point_y = (principal_point_x, principal_point_y)
         
         
     def pos_cam(self):
         pos_cam_mm = np.array([self.pix_cam_id[0] *self.Px , self.pix_cam_id[1]*self.Px, 1])
-        # pos_cam_mm = np.array([self.pix_cam_id[0] , self.pix_cam_id[1], 1])
-        # pos_cam_mm = np.array([0.0208 , (self.pix_cam_id[1]-17768/2)*self.Px, self.F])
-        
         return pos_cam_mm
         
     def img2cam(self):
         fc = self.F
         x0 = self.principal_point_x * self.Px
         y0 = self.principal_point_y * self.Py
-        # R_img2cam = np.array([[0, -1, y0],
-        #                     [1, 0, -x0],
-        #                     [0, 0, -fc]])
+
         R_img2cam = np.array([[1, 0, -x0],
                             [0, 1, -y0],
                             [0, 0, fc]])
         
-        
-        # R_img2cam = np.array([[self.principal_point_y,    0,                     0],
-        #                     [0,                         self.principal_point_x,  0],
-        #                     [-y0,                       -x0,                      fc]])
-        # R_img2cam = np.array([
-        #     [1, 0, 0],
-        #     [0,  1,  0],
-        #     [0,  0, 1]])
-        
-        return R_img2cam
-    
-    # def cam2body(self):
-    #     # 读取配置文件
-    #     with open("./config/matrix.json", "r") as file:
-    #         config = json.load(file)
-    #         # 将矩阵转换为 NumPy 格式
-    #         R_cam2body = np.array(config["cam2body"])
-    #         return R_cam2body
+        return R_img2cam   
     
     def q_rotation(self):
     # 创建旋转矩阵对象
@@ -83,14 +61,10 @@ class CalLatLon:
     
     def eci2ecr(self):
         R_eci2ecr = np.ndarray(shape=(3,3), dtype=float, order='F')
-        # sate_time = arrow.get(satatime)
         start_time = datetime(2021,1,1,0,0,0, tzinfo=timezone.utc)
         end_time = start_time + timedelta(seconds=self.timestamps)
         sate_time = end_time
-        # print(sate_time)
         date_str = sate_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        # print("date_str", date_str)
-
         et = spice.str2et(date_str)
         mat = spice.pxform('J2000', 'ITRF93',  et)
         for i in range(3):
@@ -154,21 +128,14 @@ class CalLatLon:
         
         R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)
-        # ground_point = self.cal_pos(v_i, 0)
-        # lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         
-        # elevation = get_elevation_from_dem(self.dem_path, lon, lat)
-        # # print(elevation)
-        # ground_point = self.cal_pos(v_i, int(elevation))
-        # lat, lon, alt = pymap3d.ecef2geodetic(ground_point[0], ground_point[1], ground_point[2])
         lat, lon, alt = self.iterative_ground_point_calculation(v_i)
         
         return [ lat, lon]
 
         
 def get_timestamp(line_num, time_file):
-    # time_lines = time_file.read().decode().splitlines()
-    # print("line_num: ", line_num)
+
     line = time_file[line_num]
     dat = line.strip().split('\t')
     timestamp = float(dat[1])

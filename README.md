@@ -3,7 +3,7 @@
 DockerfileBase 基础镜像，安装gdal和其他c++相关库
 
 ```shell
-docker build -f DockerfileBase -t mygeo:base.
+docker build -f DockerfileBase -t mygeo:base .
 ```
 
 Dockerfile 代码执行镜像
