@@ -112,7 +112,7 @@ class CalLatLon:
         R_body2eci_q = self.q_rotation()
         R_img2cam = self.img2cam()
         pos_cam_mm = self.pos_cam()
-        R_cam2body = self.cam2body()
+        # R_cam2body = self.cam2body()
         
         R_img2ecr = R_eci2ecr.dot(R_body2eci_q.dot(R_cam2body.dot(R_img2cam)))
         v_i = np.dot(R_img2ecr, pos_cam_mm)

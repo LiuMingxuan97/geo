@@ -17,6 +17,7 @@ def lagrange_interp(time_list: list, value_list: list, timestamp: float):
         polynomial : numpy.poly1d instance
     """
     cs = CubicSpline(time_list, value_list)
+    print(type(cs))
     # 计算插值后的 y 值
     y = cs(timestamp)
     return y
