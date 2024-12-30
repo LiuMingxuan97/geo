@@ -1,5 +1,5 @@
 # 第一阶段：构建 GDAL
-FROM python:3.12-slim AS builder
+FROM python:3.12 AS builder
 
 WORKDIR /app
 
@@ -13,12 +13,12 @@ WORKDIR /app/gdal-3.10.0
 RUN mkdir -p build && cd build \
     && cmake .. \
     && cmake --build . -j 8 \
-    && cmake --build . --target install \
-    && ln -s /usr/local/lib/libgdal.so.36.3.10.0 /usr/lib/libgdal.so \
-    && ln -s /usr/local/lib/libgdal.so.36 /usr/lib/libgdal.so.36
+    && cmake --build . --target install 
+    # && ln -s /usr/local/lib/libgdal.so.36.3.10.0 /usr/lib/libgdal.so \
+    # && ln -s /usr/local/lib/libgdal.so.36 /usr/lib/libgdal.so.36
 
 # 第二阶段：最终运行镜像
-FROM python:3.12-slim
+FROM python:3.12
 
 WORKDIR /app
 
@@ -26,11 +26,15 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib /usr/local/lib
 COPY --from=builder /usr/lib /usr/lib
 
+RUN ln -s /usr/local/lib/libgdal.so.36.3.10.0 /usr/lib/libgdal.so \
+    && ln -s /usr/local/lib/libgdal.so.36 /usr/lib/libgdal.so.36
+
+COPY . /app
 # 安装 Python 依赖
 RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-COPY . /app
+
 
 EXPOSE 9876
 
