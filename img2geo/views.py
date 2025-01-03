@@ -52,7 +52,7 @@ def geo2img(
         world_point = (geo_points_list[0], geo_points_list[1])
     except Exception as err:
         logger.info(err)
-        print("--------")
+
     height = geo_points_list[2]
     pixel_coordinates = world_to_pixel(
         initial_pixel,
