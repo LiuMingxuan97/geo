@@ -30,10 +30,7 @@ def test_api(request,
     qua_file = attPath
     line_file = itPath
     
-    # time_lines = line_file.read().decode().splitlines()
-    # print(time_lines)
-    
-    
+
     img_points_list = json.loads(imgPoints)
     results = []
     # 读取时间文件
